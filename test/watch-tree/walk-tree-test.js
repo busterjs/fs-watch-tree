@@ -3,7 +3,7 @@ var assert = buster.assert;
 var rmrf = require("rimraf");
 var path = require("path");
 var fs = require("fs");
-var fsu = require("../lib/watch-tree");
+var fsu = require("../../lib/watch-tree/walk-tree");
 var ROOT = path.join(__dirname, "fixtures");
 
 function mktree(tree, root) {
