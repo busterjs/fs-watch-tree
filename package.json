@@ -1,0 +1,24 @@
+{
+    "name": "watch-tree",
+    "version": "0.1.0",
+    "description": "Recursively watch directories for changes",
+    "homepage": "http://busterjs.org/doc/watch-tree",
+    "author": {
+        "name": "Christian Johansen",
+        "email": "christian@cjohansen.no",
+        "url": "http://cjohansen.no"
+    },
+    "contributors": [{
+        "name": "August Lilleaas",
+        "email": "august.lilleaas@gmail.com",
+        "url": "http://augustl.com"
+    }],
+    "main": "./lib/watch-tree",
+    "repository": {
+        "type": "git",
+        "url": "http://git.gitorious.org/buster/watch-tree.git"
+    },
+    "dependencies": {
+        "node-inotify": "~> 0.1.6"
+    }
+}

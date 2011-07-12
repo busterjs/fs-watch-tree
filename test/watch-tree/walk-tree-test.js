@@ -4,29 +4,12 @@ var rmrf = require("rimraf");
 var path = require("path");
 var fs = require("fs");
 var fsu = require("../../lib/watch-tree/walk-tree");
-var ROOT = path.join(__dirname, "fixtures");
-
-function mktree(tree, root) {
-    root = root || ROOT;
-    var file;
-
-    for (var prop in tree) {
-        file = path.join(root, prop);
-
-        if (typeof tree[prop] == "object") {
-            fs.mkdirSync(file, "0755");
-            mktree(tree[prop], file);
-        } else {
-            fs.writeFileSync(file, tree[prop], "utf-8");
-        }
-    }
-
-    return ROOT;
-}
+var helper = require("../helper");
+helper.ROOT = path.join(__dirname, "fixtures");
 
 function walkTreeTest(options) {
     return function (done) {
-        var root = mktree(options.tree);
+        var root = helper.mktree(options.tree);
 
         var callback = this.spy(function () {
             if (callback.callCount != options.expected.length) return;
@@ -53,11 +36,11 @@ function walkTreeTest(options) {
 
 buster.testCase("Walk tree", {
     setUp: function () {
-        fs.mkdirSync(ROOT, "0755");
+        fs.mkdirSync(helper.ROOT, "0755");
     },
 
     tearDown: function (done) {
-        rmrf(ROOT, done);
+        rmrf(helper.ROOT, done);
     },
 
     "should yield all directories to callback": walkTreeTest({
@@ -80,7 +63,7 @@ buster.testCase("Walk tree", {
 
     "should not yield excluded directories to callback": walkTreeTest({
         expected: ["/projects", "/documents"],
-        exclude: [ROOT + "/music"],
+        exclude: [helper.ROOT + "/music"],
         tree: {
             projects: {},
             music: {},
@@ -121,14 +104,14 @@ buster.testCase("Walk tree", {
         this.stub(fs, "readdir");
         var callback = this.spy();
 
-        fsu.walkTree(ROOT, callback);
+        fsu.walkTree(helper.ROOT, callback);
         fs.readdir.args[0][1]({ message: "Oops" });
 
         assert.calledWith(callback, { message: "Oops" });
     },
 
     "should yield stat error to callback": function (done) {
-        var root = mktree({ "a": {} });
+        var root = helper.mktree({ "a": {} });
         this.stub(fs, "stat").yields({ message: "Oops" });
 
         var callback = this.spy(function (err) {

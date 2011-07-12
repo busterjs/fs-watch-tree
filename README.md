@@ -15,7 +15,7 @@ ease the addition of FSEvents support down the road.
 
 ## Synopsis ##
 
-    var watchTree = require("watch-tree");
+    var watchTree = require("watch-tree").watchTree;
 
     var watch = watchTree("/home/christian", function (event) {
         // See description of event below
@@ -91,14 +91,14 @@ Returns true if the cause of the change was a directory. Same challenge as
 
 Returns true if the cause of the change was a file. Same challenge as `name`.
 
-### `wasCreated()` ###
+### `isCreate()` ###
 
 Returns true if the cause of the event was a newly created file/directory.
 
-### `wasDeleted()` ###
+### `isDelete()` ###
 
 Returns true if the cause of the event was a deleted file/directory.
 
-### `wasModified()` ###
+### `isModify()` ###
 
 Returns true if the cause of the event was a modified file/directory.
