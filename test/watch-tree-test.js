@@ -13,6 +13,7 @@ var events = {
     IN_CREATE: ino.Inotify.IN_CREATE,
     IN_DELETE: ino.Inotify.IN_DELETE,
     IN_MODIFY: ino.Inotify.IN_MODIFY,
+    IN_OPEN: ino.Inotify.IN_OPEN,
     IN_ISDIR: ino.Inotify.IN_ISDIR
 };
 
@@ -137,6 +138,20 @@ buster.testCase("watchTree", {
         assert: function () {
             this.watcher.end();
             assert.calledOnce(this.close);
+        }
+    }),
+
+    "should only watch for created, modified and deleted files/dirs": watchTest({
+        act: function () {
+            this.expectedCount = 6;
+            watchTree(helper.ROOT, { exclude: ["b"] });
+        },
+
+        assert: function () {
+            assert(this.addWatch.args[0][0].watch_for & events.IN_CREATE);
+            assert(this.addWatch.args[0][0].watch_for & events.IN_MODIFY);
+            assert(this.addWatch.args[0][0].watch_for & events.IN_DELETE);
+            refute(this.addWatch.args[0][0].watch_for & events.IN_OPEN);
         }
     }),
 
