@@ -19,6 +19,6 @@
         "url": "http://git.gitorious.org/buster/watch-tree.git"
     },
     "dependencies": {
-        "node-inotify": "~> 0.1.6"
+        "inotify": "~> 0.1.6"
     }
 }
