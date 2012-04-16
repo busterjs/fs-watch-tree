@@ -1,6 +1,4 @@
 var buster = require("buster");
-var assert = buster.assert;
-var refute = buster.refute;
 var watchTree = require("../lib/watch-tree").watchTree;
 var walkTree = require("../lib/watch-tree/walk-tree");
 var helper = require("./helper");
@@ -100,7 +98,7 @@ buster.testCase("watchTree", {
         rmrf(helper.ROOT, done);
     },
 
-    "should walk tree": function () {
+    "walks tree": function () {
         this.stub(walkTree, "walkTree");
 
         watchTree("/home/christian");
@@ -109,7 +107,7 @@ buster.testCase("watchTree", {
         assert.calledWith(walkTree.walkTree, "/home/christian");
     },
 
-    "should watch each directory": watchTest({
+    "watches each directory": watchTest({
         act: function () {
             watchTree(helper.ROOT);
         },
@@ -130,7 +128,7 @@ buster.testCase("watchTree", {
         }
     }),
 
-    "should return endable object": watchTest({
+    "returns endable object": watchTest({
         act: function () {
             this.watcher = watchTree(helper.ROOT);
         },
@@ -141,7 +139,7 @@ buster.testCase("watchTree", {
         }
     }),
 
-    "should only watch for created, modified and deleted files/dirs": watchTest({
+    "only watches for created, modified and deleted files/dirs": watchTest({
         act: function () {
             this.expectedCount = 6;
             watchTree(helper.ROOT, { exclude: ["b"] });
@@ -182,7 +180,7 @@ buster.testCase("watchTree", {
         }
     }),
 
-    "should call callback with event": eventTest({
+    "calls callback with event": eventTest({
         event: {
             watch: 1,
             mask: events.IN_CREATE,
@@ -199,7 +197,7 @@ buster.testCase("watchTree", {
         }
     }),
 
-    "should call callback with directory event": eventTest({
+    "calls callback with directory event": eventTest({
         event: {
             watch: 1,
             mask: events.IN_DELETE | events.IN_ISDIR,
@@ -214,7 +212,7 @@ buster.testCase("watchTree", {
         }
     }),
 
-    "should call callback with modify event": eventTest({
+    "calls callback with modify event": eventTest({
         event: {
             watch: 1,
             mask: events.IN_MODIFY,
@@ -240,11 +238,11 @@ buster.testCase("watchTree", {
         },
 
         assert: function () {
-            assert.notCalled(this.callback);
+            refute.called(this.callback);
         }
     }),
 
-    "should automatically watch new diretories": watchTest({
+    "automatically watches new diretories": watchTest({
         act: function () {
             watchTree(helper.ROOT);
         },

@@ -5,7 +5,6 @@ var path = require("path");
 var fs = require("fs");
 var fsu = require("../../lib/watch-tree/walk-tree");
 var helper = require("../helper");
-helper.ROOT = path.join(__dirname, "fixtures");
 
 function walkTreeTest(options) {
     return function (done) {

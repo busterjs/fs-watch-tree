@@ -2,6 +2,8 @@ var path = require("path");
 var fs = require("fs");
 
 module.exports = {
+    ROOT: path.join(__dirname, "fixtures"),
+
     mktree: function mktree(tree, root) {
         root = root || module.exports.ROOT;
         var file;

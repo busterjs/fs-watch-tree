@@ -16,9 +16,12 @@
     "main": "./lib/watch-tree",
     "repository": {
         "type": "git",
-        "url": "http://git.gitorious.org/buster/watch-tree.git"
+        "url": "https://github.com/busterjs/fs-watch-tree.git"
     },
     "dependencies": {
-        "inotify": "~> 0.1.6"
+        "inotify": "~> 0.2.2"
+    },
+    "devDependencies": {
+        "rimraf": "*"
     }
 }
