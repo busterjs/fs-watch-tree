@@ -41,7 +41,7 @@ buster.testCase("Walk tree", {
         rmrf(helper.ROOT, done);
     },
 
-    "should yield all directories to callback": walkTreeTest({
+    "yields all directories to callback": walkTreeTest({
         expected: ["/projects", "/documents", "/music"],
         tree: {
             projects: {},
@@ -98,7 +98,7 @@ buster.testCase("Walk tree", {
         }
     }),
 
-    "should yield readdir error to callback": function () {
+    "yields readdir error to callback": function () {
         this.stub(fs, "readdir");
         var callback = this.spy();
 
@@ -108,7 +108,7 @@ buster.testCase("Walk tree", {
         assert.calledWith(callback, { message: "Oops" });
     },
 
-    "should yield stat error to callback": function (done) {
+    "yields stat error to callback": function (done) {
         var root = helper.mktree({ "a": {} });
         this.stub(fs, "stat").yields({ message: "Oops" });
 

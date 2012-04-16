@@ -2,18 +2,9 @@ var buster = require("buster");
 var watchTree = require("../lib/fs-watch-tree").watchTree;
 var walkTree = require("../lib/walk-tree");
 var helper = require("./helper");
-var ino = require("inotify");
 var path = require("path");
 var fs = require("fs");
 var rmrf = require("rimraf");
-
-var events = {
-    IN_CREATE: ino.Inotify.IN_CREATE,
-    IN_DELETE: ino.Inotify.IN_DELETE,
-    IN_MODIFY: ino.Inotify.IN_MODIFY,
-    IN_OPEN: ino.Inotify.IN_OPEN,
-    IN_ISDIR: ino.Inotify.IN_ISDIR
-};
 
 function p(filePath) {
     return path.resolve(helper.ROOT, filePath);
@@ -21,14 +12,14 @@ function p(filePath) {
 
 function assertWatched(spy, path) {
     for (var i = 0, l = spy.callCount; i < l; ++i) {
-        if (spy.getCall(i).args[0].path == path) {
+        if (spy.getCall(i).args[0] == path) {
             buster.assertions.emit("pass");
             return true;
         }
     }
 
     var e = new Error("Expected " + path + " to be watched, but wasn't\n" + 
-                      spy.toString());
+                      spy.printf("%C"));
     e.name = "AssertionError";
     buster.assertions.emit("failure", e);
 }
@@ -38,7 +29,7 @@ function watchTest(options) {
         var self = this;
 
         this.onWatch = function () {
-            if (this.addWatch.callCount == this.expectedCount) {
+            if (fs.watch.callCount == this.expectedCount) {
                 setTimeout(function () {
                     options.assert.call(self);
                     done();
@@ -63,7 +54,8 @@ function eventTest(options) {
         },
 
         assert: function () {
-            this.addWatch.args[0][0].callback(options.event);
+            var ev = options && options.event || {};
+            fs.watch.args[0][1](ev.type, ev.file);
             options.assert.call(this);
         }
     });
@@ -80,18 +72,13 @@ buster.testCase("watchTree", {
 
         var self = this;
         this.onWatch = function () {};
-        this.addWatch = this.spy(function () { return self.onWatch(); });
-        this.close = this.spy();
         this.expectedCount = 11;
-
-        this.stub(ino, "Inotify").returns({
-            addWatch: this.addWatch,
-            close: this.close
+        this.watcher = buster.eventEmitter.create();
+        this.watcher.close = this.stub();
+        this.stub(fs, "watch", function () {
+            self.onWatch();
+            return self.watcher;
         });
-
-        for (var prop in events) {
-            ino.Inotify[prop] = events[prop];
-        }
     },
 
     tearDown: function (done) {
@@ -113,43 +100,29 @@ buster.testCase("watchTree", {
         },
 
         assert: function () {
-            assert.equals(this.addWatch.callCount, 11);
-            assertWatched(this.addWatch, helper.ROOT);
-            assertWatched(this.addWatch, p("a"));
-            assertWatched(this.addWatch, p("a/a1"));
-            assertWatched(this.addWatch, p("a/a2"));
-            assertWatched(this.addWatch, p("a/a2/a21"));
-            assertWatched(this.addWatch, p("a/a2/a22"));
-            assertWatched(this.addWatch, p("b"));
-            assertWatched(this.addWatch, p("b/b3"));
-            assertWatched(this.addWatch, p("b/b4"));
-            assertWatched(this.addWatch, p("b/b4/b41"));
-            assertWatched(this.addWatch, p("b/b4/b41/b411"));
+            assert.equals(fs.watch.callCount, 11);
+            assertWatched(fs.watch, helper.ROOT);
+            assertWatched(fs.watch, p("a"));
+            assertWatched(fs.watch, p("a/a1"));
+            assertWatched(fs.watch, p("a/a2"));
+            assertWatched(fs.watch, p("a/a2/a21"));
+            assertWatched(fs.watch, p("a/a2/a22"));
+            assertWatched(fs.watch, p("b"));
+            assertWatched(fs.watch, p("b/b3"));
+            assertWatched(fs.watch, p("b/b4"));
+            assertWatched(fs.watch, p("b/b4/b41"));
+            assertWatched(fs.watch, p("b/b4/b41/b411"));
         }
     }),
 
     "returns endable object": watchTest({
         act: function () {
-            this.watcher = watchTree(helper.ROOT);
+            this.watch = watchTree(helper.ROOT);
         },
 
         assert: function () {
-            this.watcher.end();
-            assert.calledOnce(this.close);
-        }
-    }),
-
-    "only watches for created, modified and deleted files/dirs": watchTest({
-        act: function () {
-            this.expectedCount = 6;
-            watchTree(helper.ROOT, { exclude: ["b"] });
-        },
-
-        assert: function () {
-            assert(this.addWatch.args[0][0].watch_for & events.IN_CREATE);
-            assert(this.addWatch.args[0][0].watch_for & events.IN_MODIFY);
-            assert(this.addWatch.args[0][0].watch_for & events.IN_DELETE);
-            refute(this.addWatch.args[0][0].watch_for & events.IN_OPEN);
+            this.watch.end();
+            assert.equals(this.watcher.close.callCount, 11);
         }
     }),
 
@@ -160,13 +133,13 @@ buster.testCase("watchTree", {
         },
 
         assert: function () {
-            assert.equals(this.addWatch.callCount, 6);
-            assertWatched(this.addWatch, helper.ROOT);
-            assertWatched(this.addWatch, p("a"));
-            assertWatched(this.addWatch, p("a/a1"));
-            assertWatched(this.addWatch, p("a/a2"));
-            assertWatched(this.addWatch, p("a/a2/a21"));
-            assertWatched(this.addWatch, p("a/a2/a22"));
+            assert.equals(fs.watch.callCount, 6);
+            assertWatched(fs.watch, helper.ROOT);
+            assertWatched(fs.watch, p("a"));
+            assertWatched(fs.watch, p("a/a1"));
+            assertWatched(fs.watch, p("a/a2"));
+            assertWatched(fs.watch, p("a/a2/a21"));
+            assertWatched(fs.watch, p("a/a2/a22"));
         }
     }),
 
@@ -176,52 +149,41 @@ buster.testCase("watchTree", {
         },
 
         assert: function () {
-            assert.equals(this.addWatch.callCount, 11);
+            assert.equals(fs.watch.callCount, 11);
         }
     }),
 
     "calls callback with event": eventTest({
-        event: {
-            watch: 1,
-            mask: events.IN_CREATE,
-            cookie: 0,
-            name: "buster.js"
-        },
+        event: { type: "change", file: "buster.js" },
 
         assert: function () {
             assert.calledOnce(this.callback);
             var event = this.callback.args[0][0];
             assert.match(event, { name: path.join(helper.ROOT, "buster.js") });
-            assert(event.isCreate());
+            assert(!event.isMkdir());
             refute(event.isDirectory());
         }
     }),
 
     "calls callback with directory event": eventTest({
-        event: {
-            watch: 1,
-            mask: events.IN_DELETE | events.IN_ISDIR,
-            cookie: 0,
-            name: "buster.js"
-        },
+        event: { type: "change", file: "a" },
 
         assert: function () {
             var event = this.callback.args[0][0];
-            assert(event.isDelete());
             assert(event.isDirectory());
         }
     }),
 
-    "calls callback with modify event": eventTest({
-        event: {
-            watch: 1,
-            mask: events.IN_MODIFY,
-            cookie: 0,
-            name: "buster.js"
+    "calls callback with mkdir event": eventTest({
+        event: { type: "change", file: "c" },
+
+        act: function () {
+            watchTree(helper.ROOT, this.callback);
+            helper.mktree({ c: {} });
         },
 
         assert: function () {
-            assert(this.callback.args[0][0].isModify());
+            assert(this.callback.args[0][0].isMkdir());
         }
     }),
 
@@ -230,12 +192,7 @@ buster.testCase("watchTree", {
             watchTree(helper.ROOT, { exclude: ["#"] }, this.callback);
         },
 
-        event: {
-            watch: 1,
-            mask: events.IN_DELETE | events.IN_ISDIR,
-            cookie: 0,
-            name: ".#buster.js"
-        },
+        event: { type: "change", file: ".#buster.js" },
 
         assert: function () {
             refute.called(this.callback);
@@ -248,17 +205,12 @@ buster.testCase("watchTree", {
         },
 
         assert: function () {
-            var callCount = this.addWatch.callCount;
+            var callCount = fs.watch.callCount;
+            helper.mktree({ newone: {} });
+            fs.watch.args[0][1]("change", "newone");
 
-            this.addWatch.args[1][0].callback({
-                watch: 1,
-                mask: events.IN_CREATE | events.IN_ISDIR,
-                cookie: 0,
-                name: "newone"
-            });
-
-            assert.equals(this.addWatch.callCount, callCount + 1);
-            assertWatched(this.addWatch, this.addWatch.args[1][0].path + "/newone");
+            assert.equals(fs.watch.callCount, callCount + 1);
+            assertWatched(fs.watch, fs.watch.args[0][0] + "/newone");
         }
     })
 });
