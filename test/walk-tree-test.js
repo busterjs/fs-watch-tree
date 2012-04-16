@@ -1,10 +1,9 @@
 var buster = require("buster");
-var assert = buster.assert;
 var rmrf = require("rimraf");
 var path = require("path");
 var fs = require("fs");
-var fsu = require("../../lib/watch-tree/walk-tree");
-var helper = require("../helper");
+var fsu = require("../lib/walk-tree");
+var helper = require("./helper");
 
 function walkTreeTest(options) {
     return function (done) {
