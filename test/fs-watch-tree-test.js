@@ -66,8 +66,8 @@ buster.testCase("watchTree", {
         fs.mkdirSync(helper.ROOT, "0755");
 
         helper.mktree({
-            a: { a1: {}, a2: { a21: {}, a22: {}, a23: "" } },
-            b: { b1: "", b2: "", b3: {}, b4: { b41: { b411: {} } } }
+            "a-dir": { a1: {}, a2: { a21: {}, a22: {}, a23: "" } },
+            "b-dir": { b1: "", b2: "", b3: {}, b4: { b41: { b411: {} } } }
         });
 
         var self = this;
@@ -76,7 +76,7 @@ buster.testCase("watchTree", {
         this.watcher = buster.eventEmitter.create();
         this.watcher.close = this.stub();
         this.stub(fs, "watch", function () {
-            self.onWatch();
+            self.onWatch.apply(self, arguments);
             return self.watcher;
         });
     },
@@ -102,16 +102,16 @@ buster.testCase("watchTree", {
         assert: function () {
             assert.equals(fs.watch.callCount, 11);
             assertWatched(fs.watch, helper.ROOT);
-            assertWatched(fs.watch, p("a"));
-            assertWatched(fs.watch, p("a/a1"));
-            assertWatched(fs.watch, p("a/a2"));
-            assertWatched(fs.watch, p("a/a2/a21"));
-            assertWatched(fs.watch, p("a/a2/a22"));
-            assertWatched(fs.watch, p("b"));
-            assertWatched(fs.watch, p("b/b3"));
-            assertWatched(fs.watch, p("b/b4"));
-            assertWatched(fs.watch, p("b/b4/b41"));
-            assertWatched(fs.watch, p("b/b4/b41/b411"));
+            assertWatched(fs.watch, p("a-dir"));
+            assertWatched(fs.watch, p("a-dir/a1"));
+            assertWatched(fs.watch, p("a-dir/a2"));
+            assertWatched(fs.watch, p("a-dir/a2/a21"));
+            assertWatched(fs.watch, p("a-dir/a2/a22"));
+            assertWatched(fs.watch, p("b-dir"));
+            assertWatched(fs.watch, p("b-dir/b3"));
+            assertWatched(fs.watch, p("b-dir/b4"));
+            assertWatched(fs.watch, p("b-dir/b4/b41"));
+            assertWatched(fs.watch, p("b-dir/b4/b41/b411"));
         }
     }),
 
@@ -129,17 +129,17 @@ buster.testCase("watchTree", {
     "should not watch excluded directory": watchTest({
         act: function () {
             this.expectedCount = 6;
-            watchTree(helper.ROOT, { exclude: ["b"] });
+            watchTree(helper.ROOT, { exclude: ["b-dir"] });
         },
 
         assert: function () {
             assert.equals(fs.watch.callCount, 6);
             assertWatched(fs.watch, helper.ROOT);
-            assertWatched(fs.watch, p("a"));
-            assertWatched(fs.watch, p("a/a1"));
-            assertWatched(fs.watch, p("a/a2"));
-            assertWatched(fs.watch, p("a/a2/a21"));
-            assertWatched(fs.watch, p("a/a2/a22"));
+            assertWatched(fs.watch, p("a-dir"));
+            assertWatched(fs.watch, p("a-dir/a1"));
+            assertWatched(fs.watch, p("a-dir/a2"));
+            assertWatched(fs.watch, p("a-dir/a2/a21"));
+            assertWatched(fs.watch, p("a-dir/a2/a22"));
         }
     }),
 
@@ -166,7 +166,7 @@ buster.testCase("watchTree", {
     }),
 
     "calls callback with directory event": eventTest({
-        event: { type: "change", file: "a" },
+        event: { type: "change", file: "a-dir" },
 
         assert: function () {
             var event = this.callback.args[0][0];
