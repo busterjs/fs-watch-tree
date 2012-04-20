@@ -2,42 +2,41 @@ var buster = require("buster");
 var changeTracker = require("../lib/fs-dir-change-tracker");
 var fs = require("fs");
 
-
 buster.testCase("dirChangeTracker", {
-  "statFiles": {
-    "yields list of statted files": function () {
-      this.stub(fs, "readdir").yields(null, ["file1", "file2"]);
-      this.stub(fs, "stat");
-      fs.stat.withArgs("file1").yields(null, { stats: "yo" });
-      fs.stat.withArgs("file2").yields(null, { stats: "ho" });
-
-      var callback = this.spy();
-      changeTracker.create("/tmp").statFiles(callback);
-
-      assert.calledWith(fs.readdir, "/tmp");
-      assert.calledOnceWith(callback, null, [
-        { name: "file1", stats: "yo" },
-        { name: "file2", stats: "ho" }
-      ]);
-    }
-  },
-
   "poll": {
-    setUp: function (done) {
-      this.stub(changeTracker, "statFiles");
-      changeTracker.statFiles.yields(null, [
+    setUp: function () {
+      this.statFiles = this.stub();
+      this.tracker = changeTracker.create(this.statFiles, [
         { name: "stale", mtime: new Date(0) },
         { name: "fresh", mtime: new Date(0) }
       ]);
-      this.tracker = changeTracker.create("/tmp");
-      this.tracker.init().then(done);
+    },
+
+    "resolves promise after statting successfully": function () {
+      var spy = this.spy();
+      this.tracker.poll().then(spy);
+
+      refute.called(spy);
+
+      this.statFiles.yield(null, []);
+      assert.called(spy);
+    },
+
+    "resolve rejects promise on error": function () {
+      var success = this.spy();
+      var failure = this.spy();
+      this.tracker.poll().then(success, failure);
+
+      this.statFiles.yield("Gosh darn it!");
+      refute.called(success);
+      assert.calledOnceWith(failure, "Gosh darn it!");
     },
 
     "emits update for files with changed mtime": function () {
       var listener = this.spy();
       this.tracker.on("update", listener);
 
-      this.tracker.statFiles.yields(null, [
+      this.statFiles.yields(null, [
         { name: "stale", mtime: new Date(0) },
         { name: "fresh", mtime: new Date(1) }
       ]);
@@ -50,7 +49,7 @@ buster.testCase("dirChangeTracker", {
       var listener = this.spy();
       this.tracker.on("delete", listener);
 
-      this.tracker.statFiles.yields(null, [
+      this.statFiles.yields(null, [
         { name: "stale", mtime: new Date(0) }
       ]);
       this.tracker.poll();
@@ -62,7 +61,7 @@ buster.testCase("dirChangeTracker", {
       var listener = this.spy();
       this.tracker.on("create", listener);
 
-      this.tracker.statFiles.yields(null, [
+      this.statFiles.yields(null, [
         { name: "stale", mtime: new Date(0) },
         { name: "fresh", mtime: new Date(0) },
         { name: "spanking", mtime: new Date(1) }
@@ -76,7 +75,7 @@ buster.testCase("dirChangeTracker", {
       var listener = this.spy();
       this.tracker.on("update", listener);
 
-      this.tracker.statFiles.yields(null, [
+      this.statFiles.yields(null, [
         { name: "stale", mtime: new Date(0) },
         { name: "fresh", mtime: new Date(1) }
       ]);
