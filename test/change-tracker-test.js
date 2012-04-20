@@ -21,7 +21,7 @@ buster.testCase("changeTracker", {
       assert.called(spy);
     },
 
-    "resolve rejects promise on error": function () {
+    "rejects promise on error": function () {
       var success = this.spy();
       var failure = this.spy();
       this.tracker.poll().then(success, failure);
