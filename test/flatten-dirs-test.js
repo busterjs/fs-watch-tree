@@ -35,9 +35,7 @@ buster.testCase('flattenDirs', {
     "includes root in result": flattenDirsTest({
         asserts: function (err, dirs) {
             assert.equals(dirs.length, 1);
-            assert.match(dirs[0], {
-                name: helper.ROOT
-            });
+            assert.equals(dirs[0].name, helper.ROOT);
         }
     }),
 
