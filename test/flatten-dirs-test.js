@@ -4,6 +4,7 @@ var fs = require("fs");
 var rmrf = require("rimraf");
 var helper = require("./helper");
 
+var fsFiltered = require("../lib/fs-filtered");
 var flattenDirs = require("../lib/flatten-dirs");
 
 function p(name) {
@@ -16,7 +17,7 @@ function flattenDirsTest(options) {
 
         this.flattenDirs(
             helper.ROOT,
-            options.excludes || [],
+            fsFiltered.create(options.excludes || []),
             done(options.asserts)
         );
     };
@@ -49,15 +50,6 @@ buster.testCase('flattenDirs', {
         }
     }),
 
-    "skips excluded files": flattenDirsTest({
-        excludes: ["#"],
-        tree: { ".#todo.txt": "" },
-
-        asserts: function (err, dirs) {
-            assert.equals(dirs[0].files.length, 0);
-        }
-    }),
-
     "finds all directories including root": flattenDirsTest({
         tree: {
             a: { a1: {}, a2: { a21: {}, a22: {}, a23: "" } },
@@ -66,20 +58,6 @@ buster.testCase('flattenDirs', {
 
         asserts: function (err, dirs) {
             assert.equals(dirs.length, 11);
-        }
-    }),
-
-    "skips excluded directories": flattenDirsTest({
-        excludes: ["node_modules"],
-
-        tree: {
-            node_modules: {},
-            lib: {}
-        },
-
-        asserts: function (err, dirs) {
-            assert.equals(dirs.length, 2);
-            assert.match(dirs[1].name, /lib$/);
         }
     })
 });
