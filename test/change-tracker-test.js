@@ -1,8 +1,7 @@
 var buster = require("buster");
-var changeTracker = require("../lib/fs-dir-change-tracker");
-var fs = require("fs");
+var changeTracker = require("../lib/change-tracker");
 
-buster.testCase("dirChangeTracker", {
+buster.testCase("changeTracker", {
   "poll": {
     setUp: function () {
       this.statFiles = this.stub();
