@@ -6,8 +6,8 @@ buster.testCase("changeTracker", {
     setUp: function () {
       this.statFiles = this.stub();
       this.tracker = changeTracker.create(this.statFiles, [
-        { name: "stale", mtime: new Date(0) },
-        { name: "fresh", mtime: new Date(0) }
+        { name: "stale" },
+        { name: "fresh" }
       ]);
     },
 
@@ -31,29 +31,16 @@ buster.testCase("changeTracker", {
       assert.calledOnceWith(failure, "Gosh darn it!");
     },
 
-    "emits update for files with changed mtime": function () {
-      var listener = this.spy();
-      this.tracker.on("update", listener);
-
-      this.statFiles.yields(null, [
-        { name: "stale", mtime: new Date(0) },
-        { name: "fresh", mtime: new Date(1) }
-      ]);
-      this.tracker.poll();
-
-      assert.calledOnceWith(listener, { name: "fresh", mtime: new Date(1) });
-    },
-
     "emits delete for files that are missing": function () {
       var listener = this.spy();
       this.tracker.on("delete", listener);
 
       this.statFiles.yields(null, [
-        { name: "stale", mtime: new Date(0) }
+        { name: "stale" }
       ]);
       this.tracker.poll();
 
-      assert.calledOnceWith(listener, { name: "fresh", mtime: new Date(0) });
+      assert.calledOnceWith(listener, { name: "fresh" });
     },
 
     "emits create for files that are brand new": function () {
@@ -61,22 +48,21 @@ buster.testCase("changeTracker", {
       this.tracker.on("create", listener);
 
       this.statFiles.yields(null, [
-        { name: "stale", mtime: new Date(0) },
-        { name: "fresh", mtime: new Date(0) },
-        { name: "spanking", mtime: new Date(1) }
+        { name: "stale" },
+        { name: "fresh" },
+        { name: "spanking" }
       ]);
       this.tracker.poll();
 
-      assert.calledOnceWith(listener, { name: "spanking", mtime: new Date(1) });
+      assert.calledOnceWith(listener, { name: "spanking" });
     },
 
     "keeps track of changes": function () {
       var listener = this.spy();
-      this.tracker.on("update", listener);
+      this.tracker.on("delete", listener);
 
       this.statFiles.yields(null, [
-        { name: "stale", mtime: new Date(0) },
-        { name: "fresh", mtime: new Date(1) }
+        { name: "stale" }
       ]);
       this.tracker.poll();
       this.tracker.poll();
