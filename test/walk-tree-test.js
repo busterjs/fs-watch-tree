@@ -18,7 +18,7 @@ function walkTreeTest(options) {
             assert.equals(callback.callCount, options.expected.length);
 
             options.expected.forEach(function (dir) {
-                assert.calledWith(callback, null, root + dir);
+                assert.calledWith(callback, null, path.join(root, dir));
             });
 
             done();
@@ -61,7 +61,7 @@ buster.testCase("Walk tree", {
 
     "should not yield excluded directories to callback": walkTreeTest({
         expected: ["/projects", "/documents"],
-        exclude: [helper.ROOT + "/music"],
+        exclude: ["music"],
         tree: {
             projects: {},
             music: {},
