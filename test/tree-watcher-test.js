@@ -26,13 +26,14 @@ buster.testCase('treeWatcher', {
     setUp: function (done) {
         fs.mkdirSync(helper.ROOT, "0755");
         helper.mktree({
-            subdir: { "nested.txt": "" },
+            subdir: { "nested.txt": "", "ignored.txt": "" },
             deleteme: {},
             ignored: {},
             "exists.txt": ""
         });
 
-        this.stub(fs, "watch");
+        this.closeWatch = this.spy();
+        this.stub(fs, "watch").returns({ close: this.closeWatch });
         this.triggerWatch = function (file) {
             return fs.watch.withArgs(file).args[0][1]();
         };
@@ -45,6 +46,24 @@ buster.testCase('treeWatcher', {
 
     tearDown: function (done) {
         rmrf(helper.ROOT, done);
+    },
+
+    "watches files and directories that aren't excluded": function () {
+        assert.called(fs.watch.withArgs(helper.ROOT));
+        assert.called(fs.watch.withArgs(p("subdir")));
+        assert.called(fs.watch.withArgs(p("subdir/nested.txt")));
+        assert.called(fs.watch.withArgs(p("deleteme")));
+        assert.called(fs.watch.withArgs(p("exists.txt")));
+
+        refute.called(fs.watch.withArgs(p("subdir/ignored.txt")));
+        refute.called(fs.watch.withArgs(p("ignored")));
+
+        assert.equals(fs.watch.callCount, 5);
+    },
+
+    "end closes all the watches": function () {
+        this.watcher.end();
+        assert.equals(this.closeWatch.callCount, 5);
     },
 
     "emits 'file:change'": function () {
