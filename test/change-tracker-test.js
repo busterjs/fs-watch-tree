@@ -1,7 +1,7 @@
 var buster = require("buster");
 var changeTracker = require("../lib/change-tracker");
 
-buster.testCase("changeTracker", {
+buster.testCase("change-tracker", {
   "poll": {
     setUp: function () {
       this.statFiles = this.stub();

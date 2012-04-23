@@ -22,7 +22,7 @@ function rootTest(options) {
     };
 }
 
-buster.testCase('treeWatcher', {
+buster.testCase('tree-watcher', {
     setUp: function (done) {
         fs.mkdirSync(helper.ROOT, "0755");
         helper.mktree({
@@ -59,6 +59,14 @@ buster.testCase('treeWatcher', {
         refute.called(fs.watch.withArgs(p("ignored")));
 
         assert.equals(fs.watch.callCount, 5);
+    },
+
+    "close watch when deleting": function (done) {
+        fs.unlinkSync(p("exists.txt"));
+
+        this.triggerWatch(helper.ROOT).then(done(function () {
+            assert.calledOnce(this.closeWatch);
+        }.bind(this)));
     },
 
     "end closes all the watches": function () {
