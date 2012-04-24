@@ -1,8 +1,10 @@
 var buster = require("buster");
-var helper = require("./helper");
 var fs = require("fs");
 var rmrf = require("rimraf");
 var path = require("path");
+
+var helper = require("./helper");
+var osWatch = require("./os-watch-helper");
 
 var treeWatcher = require("../lib/tree-watcher");
 
@@ -10,15 +12,16 @@ function p(name) {
     return path.join(helper.ROOT, name);
 }
 
-function rootTest(options) {
+function rootTest() {}
+
+function eventTest(options) {
     return function (done) {
-        this.watcher.on(options.event, this.listener);
+        var spy = this.spy();
+        this.watcher.on(options.event, spy);
 
-        options.action.call(this);
-
-        this.triggerWatch(helper.ROOT).then(done(function () {
-            assert.calledOnce(this.listener);
-        }.bind(this)));
+        options.action.call(this).then(done(function () {
+            assert.calledOnce(spy);
+        }));
     };
 }
 
@@ -32,11 +35,7 @@ buster.testCase('tree-watcher', {
             "exists.txt": ""
         });
 
-        this.closeWatch = this.spy();
-        this.stub(fs, "watch").returns({ close: this.closeWatch });
-        this.triggerWatch = function (file) {
-            return fs.watch.withArgs(file).args[0][1]();
-        };
+        this.os = osWatch.on(this, "osx");
 
         this.listener = this.spy();
 
@@ -48,7 +47,7 @@ buster.testCase('tree-watcher', {
         rmrf(helper.ROOT, done);
     },
 
-    "watches files and directories that aren't excluded": function () {
+    "//watches files and directories that aren't excluded": function () {
         assert.called(fs.watch.withArgs(helper.ROOT));
         assert.called(fs.watch.withArgs(p("subdir")));
         assert.called(fs.watch.withArgs(p("subdir/nested.txt")));
@@ -61,7 +60,7 @@ buster.testCase('tree-watcher', {
         assert.equals(fs.watch.callCount, 5);
     },
 
-    "close watch when deleting": function (done) {
+    "//close watch when deleting": function (done) {
         fs.unlinkSync(p("exists.txt"));
 
         this.triggerWatch(helper.ROOT).then(done(function () {
@@ -69,56 +68,54 @@ buster.testCase('tree-watcher', {
         }.bind(this)));
     },
 
-    "end closes all the watches": function () {
+    "//end closes all the watches": function () {
         this.watcher.end();
         assert.equals(this.closeWatch.callCount, 5);
     },
 
-    "emits 'file:change'": function () {
-        this.watcher.on("file:change", this.listener);
+    "emits 'file:change'": eventTest({
+        event: "file:change",
+        action: function () {
+            return this.os.change(p("exists.txt"));
+        }
+    }),
 
-        fs.watch.withArgs(p("exists.txt")).yield("change");
+    "emits 'file:change' for nested files": eventTest({
+        event: "file:change",
+        action: function () {
+            return this.os.change(p("subdir/nested.txt"));
+        }
+    }),
 
-        assert.calledOnce(this.listener);
-    },
-
-    "emits 'file:change' for nested files": function () {
-        this.watcher.on("file:change", this.listener);
-
-        fs.watch.withArgs(p("subdir/nested.txt")).yield("change");
-
-        assert.calledOnce(this.listener);
-    },
-
-    "emits 'file:create'": rootTest({
+    "emits 'file:create'": eventTest({
         event: "file:create",
         action: function () {
-            fs.writeFileSync(p("new.txt"), "stuff");
+            return this.os.create(p("spanking-new.txt"));
         }
     }),
 
-    "emits 'file:delete'": rootTest({
+    "emits 'file:delete'": eventTest({
         event: "file:delete",
         action: function () {
-            fs.unlinkSync(p("exists.txt"));
+            return this.os.rm(p("exists.txt"));
         }
     }),
 
-    "emits 'dir:create'": rootTest({
+    "emits 'dir:create'": eventTest({
         event: "dir:create",
         action: function () {
-            helper.mktree({ newone: {} });
+            return this.os.mkdir(p("newone"));
         }
     }),
 
-    "emits 'dir:delete'": rootTest({
+    "emits 'dir:delete'": eventTest({
         event: "dir:delete",
         action: function () {
-            fs.rmdirSync(p("deleteme"));
+            return this.os.rmdir(p("deleteme"));
         }
     }),
 
-    "watches new files": function (done) {
+    "//watches new files": function (done) {
         var spy = this.spy();
         this.watcher.on("file:change", spy);
 
