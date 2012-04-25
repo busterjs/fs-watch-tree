@@ -61,14 +61,16 @@ function dirEvent(file, event, info) {
 
 function wait() {
     var d = when.defer();
-    setTimeout(d.resolve, 100);
+    setTimeout(d.resolve, 300);
     return d.promise;
 }
 
 var platforms = {
     "integration": {
-        setUp: function (context) {
+        setUp: function () {
             this.watchers = [];
+            // counting watchers is unsupported in integration tests
+            // but this makes sure that the "end" test runs after all :-P
         },
         change: wait,
         create: wait,
@@ -126,7 +128,7 @@ module.exports = {
         fs.writeFile(file, unique++, function () {
             os.change(file).then(d.resolve);
         });
-        return when.all([d.promise, wait()]);
+        return d.promise;
     },
 
     create: function (file) {
@@ -134,7 +136,7 @@ module.exports = {
         fs.writeFile(file, unique++, function () {
             os.create(file).then(d.resolve);
         });
-        return when.all([d.promise, wait()]);
+        return d.promise;
     },
 
     rm: function (file) {
@@ -142,7 +144,7 @@ module.exports = {
         fs.unlink(file, function () {
             os.rm(file).then(d.resolve);
         });
-        return when.all([d.promise, wait()]);
+        return d.promise;
     },
 
     mkdir: function (file) {
@@ -150,7 +152,7 @@ module.exports = {
         fs.mkdir(file, function () {
             os.mkdir(file).then(d.resolve);
         });
-        return when.all([d.promise, wait()]);
+        return d.promise;
     },
 
     rmdir: function (file) {
@@ -158,6 +160,6 @@ module.exports = {
         fs.rmdir(file, function () {
             os.rmdir(file).then(d.resolve);
         });
-        return when.all([d.promise, wait()]);
+        return d.promise;
     }
 };

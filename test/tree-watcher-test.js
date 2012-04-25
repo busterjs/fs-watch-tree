@@ -37,8 +37,9 @@ function createTree(callback) {
 
 buster.testCase('tree-watcher', {
     setUp: function (done) {
+        this.timeout = 1000;
         createTree(function () {
-            this.os = osWatch.on(this, "osx");
+            this.os = osWatch.on(this, "integration");
             this.watcher = treeWatcher.create(helper.ROOT, ["ignored"]);
             this.watcher.init().then(done);
         }.bind(this));
@@ -46,14 +47,6 @@ buster.testCase('tree-watcher', {
 
     tearDown: function (done) {
         rmrf(helper.ROOT, done);
-    },
-
-    "close watch when deleting": function (done) {
-        var before = this.os.watchers.length;
-
-        this.os.rm(p("exists.txt")).then(done(function () {
-            assert.equals(this.os.watchers.length, before - 1);
-        }.bind(this)));
     },
 
     "end closes all the watches": function () {
