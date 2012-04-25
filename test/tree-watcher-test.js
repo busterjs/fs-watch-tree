@@ -8,11 +8,10 @@ var osWatch = require("./os-watch-helper");
 
 var treeWatcher = require("../lib/tree-watcher");
 
-function p(name) {
-    return path.join(helper.ROOT, name);
+function p() {
+    var names = [helper.ROOT].concat([].slice.call(arguments));
+    return path.join.apply(path, names);
 }
-
-function rootTest() {}
 
 function eventTest(options) {
     return function (done) {
@@ -25,52 +24,41 @@ function eventTest(options) {
     };
 }
 
-buster.testCase('tree-watcher', {
-    setUp: function (done) {
-        fs.mkdirSync(helper.ROOT, "0755");
-        helper.mktree({
+function createTree(callback) {
+    fs.mkdir(helper.ROOT, "0755", function () {
+        helper.mktreeAsync({
             subdir: { "nested.txt": "", "ignored.txt": "" },
             deleteme: {},
             ignored: {},
             "exists.txt": ""
-        });
+        }).then(callback);
+    });
+}
 
-        this.os = osWatch.on(this, "osx");
-
-        this.listener = this.spy();
-
-        this.watcher = treeWatcher.create(helper.ROOT, ["ignored"]);
-        this.watcher.init().then(done);
+buster.testCase('tree-watcher', {
+    setUp: function (done) {
+        createTree(function () {
+            this.os = osWatch.on(this, "osx");
+            this.watcher = treeWatcher.create(helper.ROOT, ["ignored"]);
+            this.watcher.init().then(done);
+        }.bind(this));
     },
 
     tearDown: function (done) {
         rmrf(helper.ROOT, done);
     },
 
-    "//watches files and directories that aren't excluded": function () {
-        assert.called(fs.watch.withArgs(helper.ROOT));
-        assert.called(fs.watch.withArgs(p("subdir")));
-        assert.called(fs.watch.withArgs(p("subdir/nested.txt")));
-        assert.called(fs.watch.withArgs(p("deleteme")));
-        assert.called(fs.watch.withArgs(p("exists.txt")));
+    "close watch when deleting": function (done) {
+        var before = this.os.watchers.length;
 
-        refute.called(fs.watch.withArgs(p("subdir/ignored.txt")));
-        refute.called(fs.watch.withArgs(p("ignored")));
-
-        assert.equals(fs.watch.callCount, 5);
-    },
-
-    "//close watch when deleting": function (done) {
-        fs.unlinkSync(p("exists.txt"));
-
-        this.triggerWatch(helper.ROOT).then(done(function () {
-            assert.calledOnce(this.closeWatch);
+        this.os.rm(p("exists.txt")).then(done(function () {
+            assert.equals(this.os.watchers.length, before - 1);
         }.bind(this)));
     },
 
-    "//end closes all the watches": function () {
+    "end closes all the watches": function () {
         this.watcher.end();
-        assert.equals(this.closeWatch.callCount, 5);
+        assert.equals(this.os.watchers.length, 0);
     },
 
     "emits 'file:change'": eventTest({
@@ -83,7 +71,7 @@ buster.testCase('tree-watcher', {
     "emits 'file:change' for nested files": eventTest({
         event: "file:change",
         action: function () {
-            return this.os.change(p("subdir/nested.txt"));
+            return this.os.change(p("subdir", "nested.txt"));
         }
     }),
 
@@ -115,14 +103,31 @@ buster.testCase('tree-watcher', {
         }
     }),
 
-    "//watches new files": function (done) {
+    "ignores files": function (done) {
         var spy = this.spy();
         this.watcher.on("file:change", spy);
 
-        fs.writeFileSync(p("new.txt"), "stuff");
-        this.triggerWatch(helper.ROOT).then(done(function () {
-            fs.watch.withArgs(p("new.txt")).yield("change");
-            assert.calledOnce(spy);
+        this.os.change(p("subdir", "ignored.txt")).then(done(function () {
+            refute.called(spy);
         }));
+    },
+
+    "ignores directories": function (done) {
+        var spy = this.spy();
+        this.watcher.on("file:create", spy);
+
+        this.os.create(p("ignored", "file.txt")).then(done(function () {
+            refute.called(spy);
+        }));
+    },
+
+    "watches new files": function (done) {
+        this.os.create(p("newfile.txt")).then(function () {
+            var spy = this.spy();
+            this.watcher.on("file:change", spy);
+            this.os.change(p("newfile.txt")).then(done(function () {
+                assert.calledOnce(spy);
+            }));
+        }.bind(this));
     }
 });

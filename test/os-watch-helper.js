@@ -49,44 +49,61 @@ function watch (file, callback) {
     return { close: removeWatcher.bind(this, watcher) };
 }
 
+function fileEvent(file, event, info) {
+    return when.all(this.watchers.filter(is(file)).map(function (watcher) {
+        return watcher.callback(event, info);
+    }));
+}
+
+function dirEvent(file, event, info) {
+    return fileEvent.call(this, path.dirname(file), event, info);
+}
+
+function wait() {
+    var d = when.defer();
+    setTimeout(d.resolve, 100);
+    return d.promise;
+}
+
 var platforms = {
+    "integration": {
+        setUp: function (context) {
+            this.watchers = [];
+        },
+        change: wait,
+        create: wait,
+        rm: wait,
+        mkdir: wait,
+        rmdir: wait
+    },
+
     "osx": {
         setUp: function (context) {
             this.watchers = [];
             context.stub(fs, "watch", watch.bind(this));
         },
 
-        fileEvent: function (file, event, info) {
-            return when.all(this.watchers.filter(is(file)).map(function (watcher) {
-                return watcher.callback(event, info);
-            }));
-        },
-
-        dirEvent: function (file, event, info) {
-            return this.fileEvent(path.dirname(file), event, info);
-        },
-
         change: function (file) {
-            return this.fileEvent(file, "change", null);
+            return fileEvent.call(this, file, "change", null);
         },
 
         create: function (file) {
-            return this.dirEvent(file, "rename", null);
+            return dirEvent.call(this, file, "rename", null);
         },
 
         rm: function (file) {
             return when.all([
-                this.dirEvent(file, "rename", null),
-                this.fileEvent(file, "rename", null)
+                dirEvent.call(this, file, "rename", null),
+                fileEvent.call(this, file, "rename", null)
             ]);
         },
 
         mkdir: function (file) {
-            return this.dirEvent(file, "rename", null);
+            return dirEvent.call(this, file, "rename", null);
         },
 
         rmdir: function (file) {
-            return this.dirEvent(file, "rename", null);
+            return dirEvent.call(this, file, "rename", null);
         }
     }
 };
@@ -102,28 +119,45 @@ module.exports = {
         return instance;
     },
 
+    get watchers() { return this.os.watchers; },
+
     change: function (file) {
-        fs.writeFileSync(file, unique++);
-        return this.os.change(file);
+        var d = when.defer(), os = this.os;
+        fs.writeFile(file, unique++, function () {
+            os.change(file).then(d.resolve);
+        });
+        return when.all([d.promise, wait()]);
     },
 
     create: function (file) {
-        fs.writeFileSync(file, unique++);
-        return this.os.create(file);
+        var d = when.defer(), os = this.os;
+        fs.writeFile(file, unique++, function () {
+            os.create(file).then(d.resolve);
+        });
+        return when.all([d.promise, wait()]);
     },
 
     rm: function (file) {
-        fs.unlinkSync(file);
-        return this.os.rm(file);
+        var d = when.defer(), os = this.os;
+        fs.unlink(file, function () {
+            os.rm(file).then(d.resolve);
+        });
+        return when.all([d.promise, wait()]);
     },
 
     mkdir: function (file) {
-        fs.mkdirSync(file);
-        return this.os.mkdir(file);
+        var d = when.defer(), os = this.os;
+        fs.mkdir(file, function () {
+            os.mkdir(file).then(d.resolve);
+        });
+        return when.all([d.promise, wait()]);
     },
 
     rmdir: function (file) {
-        fs.rmdirSync(file);
-        return this.os.rmdir(file);
+        var d = when.defer(), os = this.os;
+        fs.rmdir(file, function () {
+            os.rmdir(file).then(d.resolve);
+        });
+        return when.all([d.promise, wait()]);
     }
 };
