@@ -29,6 +29,8 @@ var fs = require("fs");
 var path = require("path");
 var when = require("when");
 
+var base = path.basename;
+
 var unique = new Date().getTime();
 var noop = function () {};
 
@@ -65,6 +67,11 @@ function wait() {
     return d.promise;
 }
 
+function setUp(context) {
+    this.watchers = [];
+    context.stub(fs, "watch", watch.bind(this));
+}
+
 var platforms = {
     "integration": {
         setUp: function () {
@@ -80,10 +87,7 @@ var platforms = {
     },
 
     "osx": {
-        setUp: function (context) {
-            this.watchers = [];
-            context.stub(fs, "watch", watch.bind(this));
-        },
+        setUp: setUp,
 
         change: function (file) {
             return fileEvent.call(this, file, "change", null);
@@ -106,6 +110,45 @@ var platforms = {
 
         rmdir: function (file) {
             return dirEvent.call(this, file, "rename", null);
+        }
+    },
+
+    "unix": {
+        setUp: setUp,
+
+        change: function (file) {
+            return when.all([
+                dirEvent.call(this, file, "change", base(file)),
+                fileEvent.call(this, file, "change", base(file))
+            ]);
+        },
+
+        create: function (file) {
+            return when.all([
+                dirEvent.call(this, file, "rename", base(file)),
+                dirEvent.call(this, file, "change", base(file))
+            ]);
+        },
+
+        rm: function (file) {
+            return when.all([
+                dirEvent.call(this, file, "rename", base(file)),
+                fileEvent.call(this, file, "change", base(file)),
+                fileEvent.call(this, file, "rename", base(file)),
+                fileEvent.call(this, file, "rename", base(file))
+            ]);
+        },
+
+        mkdir: function (file) {
+            return dirEvent.call(this, file, "rename", base(file));
+        },
+
+        rmdir: function (file) {
+            return when.all([
+                dirEvent.call(this, file, "rename", base(file)),
+                fileEvent.call(this, file, "rename", base(file)),
+                fileEvent.call(this, file, "rename", base(file))
+            ]);
         }
     }
 };
