@@ -28,6 +28,7 @@ var path = require("path");
 var when = require("when");
 
 var base = path.basename;
+var dir = path.dirname;
 
 var unique = new Date().getTime();
 var noop = function () {};
@@ -49,14 +50,10 @@ function watch (file, callback) {
     return { close: removeWatcher.bind(this, watcher) };
 }
 
-function fileEvent(file, event, info) {
+function event(file, event, info) {
     return when.all(this.watchers.filter(is(file)).map(function (watcher) {
         return watcher.callback(event, info);
     }));
-}
-
-function dirEvent(file, event, info) {
-    return fileEvent.call(this, path.dirname(file), event, info);
 }
 
 function wait() {
@@ -88,26 +85,26 @@ var platforms = {
         setUp: setUp,
 
         change: function (file) {
-            return fileEvent.call(this, file, "change", null);
+            return event.call(this, file, "change", null);
         },
 
         create: function (file) {
-            return dirEvent.call(this, file, "rename", null);
+            return event.call(this, dir(file), "rename", null);
         },
 
         rm: function (file) {
             return when.all([
-                dirEvent.call(this, file, "rename", null),
-                fileEvent.call(this, file, "rename", null)
+                event.call(this, dir(file), "rename", null),
+                event.call(this, file, "rename", null)
             ]);
         },
 
         mkdir: function (file) {
-            return dirEvent.call(this, file, "rename", null);
+            return event.call(this, dir(file), "rename", null);
         },
 
         rmdir: function (file) {
-            return dirEvent.call(this, file, "rename", null);
+            return event.call(this, dir(file), "rename", null);
         }
     },
 
@@ -116,36 +113,80 @@ var platforms = {
 
         change: function (file) {
             return when.all([
-                dirEvent.call(this, file, "change", base(file)),
-                fileEvent.call(this, file, "change", base(file))
+                event.call(this, dir(file), "change", base(file)),
+                event.call(this, file, "change", base(file))
             ]);
         },
 
         create: function (file) {
             return when.all([
-                dirEvent.call(this, file, "rename", base(file)),
-                dirEvent.call(this, file, "change", base(file))
+                event.call(this, dir(file), "rename", base(file)),
+                event.call(this, dir(file), "change", base(file))
             ]);
         },
 
         rm: function (file) {
             return when.all([
-                dirEvent.call(this, file, "rename", base(file)),
-                fileEvent.call(this, file, "change", base(file)),
-                fileEvent.call(this, file, "rename", base(file)),
-                fileEvent.call(this, file, "rename", base(file))
+                event.call(this, dir(file), "rename", base(file)),
+                event.call(this, file, "change", base(file)),
+                event.call(this, file, "rename", base(file)),
+                event.call(this, file, "rename", base(file))
             ]);
         },
 
         mkdir: function (file) {
-            return dirEvent.call(this, file, "rename", base(file));
+            return event.call(this, dir(file), "rename", base(file));
         },
 
         rmdir: function (file) {
             return when.all([
-                dirEvent.call(this, file, "rename", base(file)),
-                fileEvent.call(this, file, "rename", base(file)),
-                fileEvent.call(this, file, "rename", base(file))
+                event.call(this, dir(file), "rename", base(file)),
+                event.call(this, file, "rename", base(file)),
+                event.call(this, file, "rename", base(file))
+            ]);
+        }
+    },
+
+    "windows": {
+        setUp: setUp,
+
+        change: function (file) {
+            return when.all([
+                event.call(this, dir(file), "change", base(file)),
+                event.call(this, file, "change", base(file)),
+                event.call(this, dir(file), "change", base(file)),
+                event.call(this, file, "change", base(file))
+            ]);
+        },
+
+        create: function (file) {
+            return when.all([
+                event.call(this, dir(dir(file)), "change", base(dir(file))),
+                event.call(this, dir(file), "rename", base(file)),
+                event.call(this, dir(dir(file)), "change", base(dir(file))),
+                event.call(this, dir(file), "change", base(file))
+            ]);
+        },
+
+        rm: function (file) {
+            return when.all([
+                event.call(this, dir(file), "rename", null),
+                event.call(this, file, "rename", base(file))
+            ]);
+        },
+
+        mkdir: function (file) {
+            return when.all([
+                event.call(this, dir(file), "rename", base(file)),
+                event.call(this, dir(dir(file)), "change", base(dir(file)))
+            ]);
+        },
+
+        rmdir: function (file) {
+            return when.all([
+                event.call(this, dir(file), "rename", null),
+                event.call(this, file, "rename", base(file)),
+                event.call(this, dir(dir(file)), "change", base(dir(file)))
             ]);
         }
     }

@@ -127,4 +127,6 @@ function testPlatform(platform) {
     });
 }
 
-["unix", "osx"].forEach(testPlatform);
+["unix", "osx", "windows"].forEach(testPlatform);
+
+// testPlatform("integration");
