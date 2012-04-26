@@ -4,24 +4,22 @@
  *
  * Usage:
  *
- *     var os = osWatch.create(this, "windows"); // `this` is the test context
+ *     var os = osWatch.on(this, "windows"); // `this` is the test context
  *
  *     os.create("file")
  *     os.change("file")
  *     os.mkdir("dir")
  *     os.rmdir("dir")
- *     os.rename("file", "new")
- *     os.move("file", "dir")
  *     os.rm("file")
+ *     os.rename("file", "new") // todo
+ *     os.move("file", "dir") // todo
  *
  * Platforms:
  *
  *     unix
- *     windows
+ *     windows // todo
  *     osx
  *     integration (no stubbing)
- *
- * The windows version translates / to \ for you. You're welcome.
  *
  */
 
@@ -169,7 +167,7 @@ module.exports = {
     change: function (file) {
         var d = when.defer(), os = this.os;
         fs.writeFile(file, unique++, function () {
-            os.change(file).then(d.resolve);
+            os.change(file).then(d.resolve, d.resolve);
         });
         return d.promise;
     },
@@ -177,7 +175,7 @@ module.exports = {
     create: function (file) {
         var d = when.defer(), os = this.os;
         fs.writeFile(file, unique++, function () {
-            os.create(file).then(d.resolve);
+            os.create(file).then(d.resolve, d.resolve);
         });
         return d.promise;
     },
@@ -185,7 +183,7 @@ module.exports = {
     rm: function (file) {
         var d = when.defer(), os = this.os;
         fs.unlink(file, function () {
-            os.rm(file).then(d.resolve);
+            os.rm(file).then(d.resolve, d.resolve);
         });
         return d.promise;
     },
@@ -193,7 +191,7 @@ module.exports = {
     mkdir: function (file) {
         var d = when.defer(), os = this.os;
         fs.mkdir(file, function () {
-            os.mkdir(file).then(d.resolve);
+            os.mkdir(file).then(d.resolve, d.resolve);
         });
         return d.promise;
     },
@@ -201,7 +199,7 @@ module.exports = {
     rmdir: function (file) {
         var d = when.defer(), os = this.os;
         fs.rmdir(file, function () {
-            os.rmdir(file).then(d.resolve);
+            os.rmdir(file).then(d.resolve, d.resolve);
         });
         return d.promise;
     }
