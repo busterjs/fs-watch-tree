@@ -7,7 +7,7 @@ var helper = require("./helper");
 
 function walkTreeTest(options) {
     return function (done) {
-        var root = helper.mktree(options.tree);
+        var root = helper.mktreeSync(options.tree);
 
         var callback = this.spy(function () {
             if (callback.callCount != options.expected.length) return;
@@ -109,7 +109,7 @@ buster.testCase("Walk tree", {
     },
 
     "yields stat error to callback": function (done) {
-        var root = helper.mktree({ "a": {} });
+        var root = helper.mktreeSync({ "a": {} });
         this.stub(fs, "stat").yields({ message: "Oops" });
 
         var callback = this.spy(function (err) {

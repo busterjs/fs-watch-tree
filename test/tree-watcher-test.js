@@ -26,7 +26,7 @@ function eventTest(options) {
 
 function createTree(callback) {
     fs.mkdir(helper.ROOT, "0755", function () {
-        helper.mktreeAsync({
+        helper.mktree({
             subdir: { "nested.txt": "", "ignored.txt": "" },
             deleteme: {},
             ignored: {},

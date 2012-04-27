@@ -18,7 +18,7 @@ function assertWatched(spy, path) {
         }
     }
 
-    var e = new Error("Expected " + path + " to be watched, but wasn't\n" + 
+    var e = new Error("Expected " + path + " to be watched, but wasn't\n" +
                       spy.printf("%C"));
     e.name = "AssertionError";
     buster.assertions.emit("failure", e);
@@ -65,7 +65,7 @@ buster.testCase("watchTree", {
     setUp: function () {
         fs.mkdirSync(helper.ROOT, "0755");
 
-        helper.mktree({
+        helper.mktreeSync({
             "a-dir": { a1: {}, a2: { a21: {}, a22: {}, a23: "" } },
             "b-dir": { b1: "", b2: "", b3: {}, b4: { b41: { b411: {} } } }
         });
@@ -179,7 +179,7 @@ buster.testCase("watchTree", {
 
         act: function () {
             watchTree(helper.ROOT, this.callback);
-            helper.mktree({ c: {} });
+            helper.mktreeSync({ c: {} });
         },
 
         assert: function () {
@@ -206,7 +206,7 @@ buster.testCase("watchTree", {
 
         assert: function () {
             var callCount = fs.watch.callCount;
-            helper.mktree({ newone: {} });
+            helper.mktreeSync({ newone: {} });
             fs.watch.args[0][1]("change", "newone");
 
             assert.equals(fs.watch.callCount, callCount + 1);
