@@ -40,7 +40,7 @@ var tests = [
     { header: "Renaming file", action: function (done) { fs.rename("root/dir1/file.txt", "root/dir1/new.txt", done); } },
     { header: "Moving file",   action: function (done) { fs.rename("root/dir1/file.txt", "root/dir2/file.txt", done); } },
     { header: "Creating dir",  action: function (done) { fs.mkdir("root/dir1/dir11", done); } },
-    { header: "Deleting dir",  action: function (done) { fs.rmdir("root/dir2", done); } },
+    { header: "Deleting dir",  action: function (done) { rmrf("root/dir2", done); } },
     { header: "Renaming dir",  action: function (done) { fs.rename("root/dir1", "root/awesomedir", done); } },
     { header: "Moving dir",    action: function (done) { fs.rename("root/dir1", "root/dir2/dir1", done); } }
 ];
