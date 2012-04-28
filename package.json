@@ -1,6 +1,6 @@
 {
     "name": "fs-watch-tree",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Recursively watch directories for changes",
     "homepage": "http://busterjs.org/doc/fs-watch-tree",
     "author": {
@@ -12,8 +12,11 @@
         "name": "August Lilleaas",
         "email": "august.lilleaas@gmail.com",
         "url": "http://augustl.com"
+    }, {
+        "name": "Magnar Sveen",
+        "email": "magnars@gmail.com"
     }],
-    "main": "./lib/wt-legacy-wrapper",
+    "main": "./lib/fs-watch-tree",
     "repository": {
         "type": "git",
         "url": "https://github.com/busterjs/fs-watch-tree.git"
