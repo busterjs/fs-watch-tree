@@ -1,5 +1,5 @@
 var buster = require("buster");
-var watchTree = require("../lib/fs-watch-tree").watchTree;
+var watchTree = require("../lib/watch-tree-unix").watchTree;
 var walkTree = require("../lib/walk-tree");
 var helper = require("./helper");
 var path = require("path");
@@ -61,7 +61,7 @@ function eventTest(options) {
     });
 }
 
-buster.testCase("watchTree", {
+buster.testCase("watch-tree-unix", {
     setUp: function () {
         fs.mkdirSync(helper.ROOT, "0755");
 

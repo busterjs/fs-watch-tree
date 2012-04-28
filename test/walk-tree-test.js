@@ -32,7 +32,7 @@ function walkTreeTest(options) {
     };
 }
 
-buster.testCase("Walk tree", {
+buster.testCase("walk-tree", {
     setUp: function () {
         fs.mkdirSync(helper.ROOT, "0755");
     },
