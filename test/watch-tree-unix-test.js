@@ -210,7 +210,7 @@ buster.testCase("watch-tree-unix", {
             fs.watch.args[0][1]("change", "newone");
 
             assert.equals(fs.watch.callCount, callCount + 1);
-            assertWatched(fs.watch, fs.watch.args[0][0] + "/newone");
+            assertWatched(fs.watch, path.join(fs.watch.args[0][0], "newone"));
         }
     })
 });
