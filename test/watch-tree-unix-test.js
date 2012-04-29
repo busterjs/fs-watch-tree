@@ -189,10 +189,10 @@ buster.testCase("watch-tree-unix", {
 
     "should not call callback with excluded file": eventTest({
         act: function () {
-            watchTree(helper.ROOT, { exclude: ["#"] }, this.callback);
+            watchTree(helper.ROOT, { exclude: ["~"] }, this.callback);
         },
 
-        event: { type: "change", file: ".#buster.js" },
+        event: { type: "change", file: "~buster.js" },
 
         assert: function () {
             refute.called(this.callback);

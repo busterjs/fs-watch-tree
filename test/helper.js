@@ -3,7 +3,7 @@ var path = require("path");
 var fs = require("fs");
 
 module.exports = {
-    ROOT: path.join(__dirname, "fixtures"),
+    ROOT: path.join(__dirname, ".#fixtures"),
 
     mktreeSync: function mktreeSync(tree, root) {
         root = root || module.exports.ROOT;
