@@ -22,7 +22,7 @@
         "url": "https://github.com/busterjs/fs-watch-tree.git"
     },
     "scripts": {
-        "test": "buster test"
+        "test": "./node_modules/buster/bin/buster-test"
     },
     "dependencies": {
         "when": "https://github.com/cujojs/when/tarball/1.0.2"
