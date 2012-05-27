@@ -1,5 +1,7 @@
 # fs-watch-tree - Recursive fs.watch #
 
+![Build status](https://secure.travis-ci.org/busterjs/fs-watch-tree.png?branch=master)
+
 **fs-watch-tree** is a small tool to watch directories for changes recursively.
 It uses
 [fs-watch](http://nodejs.org/docs/latest/api/fs.html#fs_fs_watch_filename_options_listener)
