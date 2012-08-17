@@ -41,7 +41,7 @@ function testPlatform(platform) {
             this.timeout = 1000;
             createTree(function () {
                 this.os = osWatch.on(this, platform);
-                this.watcher = treeWatcher.create(helper.ROOT, ["ignored"]);
+                this.watcher = treeWatcher.create(helper.ROOT, [/ignored/]);
                 this.watcher.init().then(done);
             }.bind(this));
         },

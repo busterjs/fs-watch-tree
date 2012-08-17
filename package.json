@@ -22,7 +22,8 @@
         "url": "https://github.com/busterjs/fs-watch-tree.git"
     },
     "dependencies": {
-        "when": "https://github.com/cujojs/when/tarball/1.0.2"
+        "when": "https://github.com/cujojs/when/tarball/1.0.2",
+        "minimatch": "~0.2"
     },
     "devDependencies": {
         "rimraf": "*"

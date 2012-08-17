@@ -104,7 +104,10 @@ var platforms = {
         },
 
         rmdir: function (file) {
-            return event.call(this, dir(file), "rename", null);
+            return when.all([
+                event.call(this, dir(file), "rename", null),
+                event.call(this, file, "rename", null)
+            ]);
         }
     },
 
