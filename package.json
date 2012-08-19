@@ -3,18 +3,22 @@
     "version": "0.2.2",
     "description": "Recursively watch directories for changes",
     "homepage": "http://busterjs.org/doc/fs-watch-tree",
-    "author": {
+    "author": "Christian Johansen",
+    "contributors": [{
         "name": "Christian Johansen",
         "email": "christian@cjohansen.no",
         "url": "http://cjohansen.no"
-    },
-    "contributors": [{
+    }, {
         "name": "August Lilleaas",
         "email": "august.lilleaas@gmail.com",
         "url": "http://augustl.com"
     }, {
         "name": "Magnar Sveen",
         "email": "magnars@gmail.com"
+    }, {
+        "name": "Stein Magnus Jodal",
+        "email": "stein.magnus@jodal.no",
+        "url": "http://jodal.no"
     }],
     "main": "./lib/fs-watch-tree",
     "repository": {
