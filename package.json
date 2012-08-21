@@ -3,7 +3,7 @@
     "version": "0.2.2",
     "description": "Recursively watch directories for changes",
     "homepage": "http://busterjs.org/doc/fs-watch-tree",
-    "author": "Christian Johansen",
+    "author": "Magnar Sveen",
     "contributors": [{
         "name": "Christian Johansen",
         "email": "christian@cjohansen.no",
