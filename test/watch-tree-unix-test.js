@@ -11,8 +11,9 @@ function p(filePath) {
 }
 
 function assertWatched(spy, path) {
-    for (var i = 0, l = spy.callCount; i < l; ++i) {
-        if (spy.getCall(i).args[0] == path) {
+    var i, l;
+    for (i = 0, l = spy.callCount; i < l; ++i) {
+        if (spy.getCall(i).args[0] === path) {
             buster.assertions.emit("pass");
             return true;
         }
@@ -29,7 +30,7 @@ function watchTest(options) {
         var self = this;
 
         this.onWatch = function () {
-            if (fs.watch.callCount == this.expectedCount) {
+            if (fs.watch.callCount === this.expectedCount) {
                 setTimeout(function () {
                     options.assert.call(self);
                     done();
@@ -54,7 +55,7 @@ function eventTest(options) {
         },
 
         assert: function () {
-            var ev = options && options.event || {};
+            var ev = (options && options.event) || {};
             fs.watch.args[0][1](ev.type, ev.file);
             options.assert.call(this);
         }

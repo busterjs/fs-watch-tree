@@ -33,15 +33,19 @@ var dir = path.dirname;
 var unique = new Date().getTime();
 var noop = function () {};
 
-var is = function (file) { return function (watcher) { return file === watcher.file; }; };
+var is = function (file) {
+    return function (watcher) { return file === watcher.file; };
+};
 
-var notEq = function (watcher) { return function (w) { return w !== watcher; }; };
+var notEq = function (watcher) {
+    return function (w) { return w !== watcher; };
+};
 
 function removeWatcher(watcher) {
     this.watchers = this.watchers.filter(notEq(watcher));
 }
 
-function watch (file, callback) {
+function watch(file, callback) {
     var watcher = {
         file: file,
         callback: callback
@@ -50,9 +54,9 @@ function watch (file, callback) {
     return { close: removeWatcher.bind(this, watcher) };
 }
 
-function event(file, event, info) {
+function event(file, e, info) {
     return when.all(this.watchers.filter(is(file)).map(function (watcher) {
-        return watcher.callback(event, info);
+        return watcher.callback(e, info);
     }));
 }
 
@@ -207,6 +211,7 @@ module.exports = {
     },
 
     get watchers() { return this.os.watchers; },
+    set watchers(value) { throw new Error("Property is not writable"); },
 
     change: function (file) {
         var d = when.defer(), os = this.os;

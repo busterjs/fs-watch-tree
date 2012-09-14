@@ -7,12 +7,12 @@ module.exports = {
 
     mktreeSync: function mktreeSync(tree, root) {
         root = root || module.exports.ROOT;
-        var file;
+        var file, prop;
 
-        for (var prop in tree) {
+        for (prop in tree) {
             file = path.join(root, prop);
 
-            if (typeof tree[prop] == "object") {
+            if (typeof tree[prop] === "object") {
                 fs.mkdirSync(file, "0755");
                 mktreeSync(tree[prop], file);
             } else {
@@ -25,10 +25,10 @@ module.exports = {
 
     mktree: function mktree(tree, root) {
         root = root || module.exports.ROOT;
-        var file, d;
+        var file, d, prop;
         var promises = [];
 
-        for (var prop in tree) {
+        for (prop in tree) {
             d = when.defer();
             file = path.join(root, prop);
 

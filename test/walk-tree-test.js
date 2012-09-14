@@ -7,12 +7,7 @@ var helper = require("./helper");
 
 function walkTreeTest(options) {
     return function (done) {
-        var root = helper.mktreeSync(options.tree);
-
-        var callback = this.spy(function () {
-            if (callback.callCount != options.expected.length) return;
-            setTimeout(verify, 10);
-        });
+        var callback, root = helper.mktreeSync(options.tree);
 
         function verify() {
             assert.equals(callback.callCount, options.expected.length);
@@ -23,6 +18,11 @@ function walkTreeTest(options) {
 
             done();
         }
+
+        callback = this.spy(function () {
+            if (callback.callCount !== options.expected.length) { return; }
+            setTimeout(verify, 10);
+        });
 
         if (options.exclude) {
             fsu.walkTree(root, { exclude: options.exclude }, callback);
@@ -69,7 +69,7 @@ buster.testCase("walk-tree", {
         }
     }),
 
-    "should not yield excluded directories by regexp to callback": walkTreeTest({
+    "should not yield excluded directories by regexp": walkTreeTest({
         expected: ["/projects", "/documents"],
         exclude: ["music"],
         tree: {

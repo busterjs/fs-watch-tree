@@ -10,12 +10,25 @@ function f() { return false; }
 
 buster.testCase('fs-filtered', {
     setUp: function () {
-        this.stub(fs, "readdir").yields(null, ["mydir", "f1.js", "f2.md", ".#meh"]);
+        var files = ["mydir", "f1.js", "f2.md", ".#meh"];
+        this.stub(fs, "readdir").yields(null, files);
         this.stub(fs, "stat");
-        fs.stat.withArgs(p("tmp", "mydir")).yields(null, { stats: "oh", isDirectory: t });
-        fs.stat.withArgs(p("tmp", "f1.js")).yields(null, { stats: "yo", isDirectory: f });
-        fs.stat.withArgs(p("tmp", "f2.md")).yields(null, { stats: "ho", isDirectory: f });
-        fs.stat.withArgs(p("tmp", ".#meh")).yields(null, { stats: "no", isDirectory: f });
+        fs.stat.withArgs(p("tmp", "mydir")).yields(null, {
+            stats: "oh",
+            isDirectory: t
+        });
+        fs.stat.withArgs(p("tmp", "f1.js")).yields(null, {
+            stats: "yo",
+            isDirectory: f
+        });
+        fs.stat.withArgs(p("tmp", "f2.md")).yields(null, {
+            stats: "ho",
+            isDirectory: f
+        });
+        fs.stat.withArgs(p("tmp", ".#meh")).yields(null, {
+            stats: "no",
+            isDirectory: f
+        });
     },
 
     "stats all files in a directory": function () {
