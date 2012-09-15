@@ -2,6 +2,32 @@ var when = require("when");
 var path = require("path");
 var fs = require("fs");
 
+var mknode;
+
+function mktree(tree, root) {
+    root = root || module.exports.ROOT;
+    var file, d, prop;
+    var promises = [];
+
+    for (prop in tree) {
+        d = when.defer();
+        promises.push(d.promise);
+        mknode(tree, prop, path.join(root, prop), d.resolve);
+    }
+
+    return when.all(promises);
+}
+
+mknode = function (tree, prop, file, callback) {
+    if (typeof tree[prop] === "object") {
+        fs.mkdir(file, "0755", function () {
+            mktree(tree[prop], file).then(callback);
+        });
+    } else {
+        fs.writeFile(file, tree[prop], "utf-8", callback);
+    }
+};
+
 module.exports = {
     ROOT: path.join(__dirname, ".#fixtures"),
 
@@ -23,26 +49,5 @@ module.exports = {
         return module.exports.ROOT;
     },
 
-    mktree: function mktree(tree, root) {
-        root = root || module.exports.ROOT;
-        var file, d, prop;
-        var promises = [];
-
-        for (prop in tree) {
-            d = when.defer();
-            file = path.join(root, prop);
-
-            promises.push(d.promise);
-
-            if (typeof tree[prop] == "object") {
-                fs.mkdir(file, "0755", function (prop, file, d) {
-                    mktree(tree[prop], file).then(d.resolve);
-                }.bind(this, prop, file, d));
-            } else {
-                fs.writeFile(file, tree[prop], "utf-8", d.resolve);
-            }
-        }
-
-        return when.all(promises);
-    }
+    mktree: mktree
 };
