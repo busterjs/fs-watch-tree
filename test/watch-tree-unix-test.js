@@ -63,6 +63,11 @@ function eventTest(options) {
 }
 
 buster.testCase("watch-tree-unix", {
+    
+    requiresSupportFor: {
+        "*nix": process.platform != "win32"
+    },
+    
     setUp: function () {
         fs.mkdirSync(helper.ROOT, "0755");
 
