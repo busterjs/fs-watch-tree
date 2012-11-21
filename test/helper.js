@@ -2,6 +2,7 @@ var when = require("when");
 var path = require("path");
 var fs = require("fs");
 
+// Please jslint...
 var mknode;
 
 function mktree(tree, root) {
@@ -18,7 +19,7 @@ function mktree(tree, root) {
     return when.all(promises);
 }
 
-mknode = function (tree, prop, file, callback) {
+function mknode(tree, prop, file, callback) {
     if (typeof tree[prop] === "object") {
         fs.mkdir(file, "0755", function () {
             mktree(tree[prop], file).then(callback);
@@ -26,7 +27,7 @@ mknode = function (tree, prop, file, callback) {
     } else {
         fs.writeFile(file, tree[prop], "utf-8", callback);
     }
-};
+}
 
 module.exports = {
     ROOT: path.join(__dirname, ".#fixtures"),

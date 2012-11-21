@@ -51,7 +51,10 @@ function watch(file, callback) {
         callback: callback
     };
     this.watchers.push(watcher);
-    return { close: removeWatcher.bind(this, watcher), on: function() {} };
+    return {
+        close: removeWatcher.bind(this, watcher),
+        on: function () {}
+    };
 }
 
 function event(file, e, info) {
@@ -210,8 +213,8 @@ module.exports = {
         return instance;
     },
 
-    get watchers() { return this.os.watchers; },
-    set watchers(value) { throw new Error("Property is not writable"); },
+    get watchers () { return this.os.watchers; },
+    set watchers (value) { throw new Error("Property is not writable"); },
 
     change: function (file) {
         var d = when.defer(), os = this.os;

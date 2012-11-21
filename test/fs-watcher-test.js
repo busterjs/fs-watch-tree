@@ -53,14 +53,14 @@ buster.testCase('fs-watcher', {
 
         assert.calledTwice(this.closer.close);
     },
-    
+
     "register error handler for closer": function () {
 
         this.watcher.watch({ name: "files" }, this.spy());
-        
+
         assert.calledWith(this.closer.on, "error");
     },
-    
+
     "ignore error if directory doesn't exist": function () {
 
         this.stub(fs, "exists", function (fileName, callback) {
@@ -72,26 +72,28 @@ buster.testCase('fs-watcher', {
         this.closer.on = function (event, callback) {
             if (event === "error") {
                 refute.exception(callback.bind(null, error));
-                assert.calledWith(console.log, "Watching error occurred for non existing file: notExist (Error: permission)");
+                assert.calledWith(console.log, "Watching error occurred for " +
+                                  "non existing file: notExist (Error: " +
+                                  "permission)");
             }
         };
-        
+
         this.watcher.watch({ name: "notExist" }, this.spy());
     },
-    
+
     "forward error if directory exist": function () {
-        
+
         this.stub(fs, "exists", function (fileName, callback) {
             callback(true);
         });
         var error = new Error("error");
-        
+
         this.closer.on = function (event, callback) {
             if (event === "error") {
                 assert.exception(callback.bind(null, error), "Error", "error");
             }
         };
-        
+
         this.watcher.watch({ name: "files" }, this.spy());
     }
 
