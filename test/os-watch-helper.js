@@ -51,7 +51,7 @@ function watch(file, callback) {
         callback: callback
     };
     this.watchers.push(watcher);
-    return { close: removeWatcher.bind(this, watcher) };
+    return { close: removeWatcher.bind(this, watcher), on: function() {} };
 }
 
 function event(file, e, info) {
