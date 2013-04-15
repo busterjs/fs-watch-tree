@@ -1,4 +1,6 @@
-var buster = require("buster");
+var buster = require("buster-node");
+var assert = buster.referee.assert;
+var refute = buster.referee.refute;
 var changeTracker = require("../lib/change-tracker");
 
 buster.testCase("change-tracker", {

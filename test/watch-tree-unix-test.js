@@ -1,4 +1,6 @@
-var buster = require("buster");
+var buster = require("buster-node");
+var assert = buster.referee.assert;
+var refute = buster.referee.refute;
 var watchTree = require("../lib/watch-tree-unix").watchTree;
 var walkTree = require("../lib/walk-tree");
 var helper = require("./helper");
@@ -14,7 +16,7 @@ function assertWatched(spy, path) {
     var i, l;
     for (i = 0, l = spy.callCount; i < l; ++i) {
         if (spy.getCall(i).args[0] === path) {
-            buster.assertions.emit("pass");
+            buster.referee.emit("pass");
             return true;
         }
     }
@@ -22,7 +24,7 @@ function assertWatched(spy, path) {
     var e = new Error("Expected " + path + " to be watched, but wasn't\n" +
                       spy.printf("%C"));
     e.name = "AssertionError";
-    buster.assertions.emit("failure", e);
+    buster.referee.emit("failure", e);
 }
 
 function watchTest(options) {

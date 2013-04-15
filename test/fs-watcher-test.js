@@ -1,4 +1,6 @@
-var buster = require("buster");
+var buster = require("buster-node");
+var assert = buster.referee.assert;
+var refute = buster.referee.refute;
 var fs = require("fs");
 
 var fsWatcher = require("../lib/fs-watcher");
