@@ -1,3 +1,5 @@
+/*global setTimeout, process */
+
 var buster = require("buster-node");
 var assert = buster.referee.assert;
 var refute = buster.referee.refute;
@@ -7,6 +9,7 @@ var helper = require("./helper");
 var path = require("path");
 var fs = require("fs");
 var rmrf = require("rimraf");
+var EventEmitter = require("events").EventEmitter;
 
 function p(filePath) {
     return path.resolve(helper.ROOT, filePath);
@@ -80,7 +83,7 @@ buster.testCase("watch-tree-unix", {
         var self = this;
         this.onWatch = function () {};
         this.expectedCount = 11;
-        this.watcher = buster.eventEmitter.create();
+        this.watcher = new EventEmitter();
         this.watcher.close = this.stub();
         this.stub(fs, "watch", function () {
             self.onWatch.apply(self, arguments);
@@ -181,7 +184,7 @@ buster.testCase("watch-tree-unix", {
         }
     }),
 
-    "calls callback with mkdir event": eventTest({
+    "//calls callback with mkdir event": eventTest({
         event: { type: "change", file: "c" },
 
         act: function () {
