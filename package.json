@@ -1,6 +1,6 @@
 {
     "name": "fs-watch-tree",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "Recursively watch directories for changes",
     "homepage": "http://busterjs.org/doc/fs-watch-tree",
     "author": "Magnar Sveen",
