@@ -33,7 +33,7 @@
         "minimatch": "~0.2"
     },
     "devDependencies": {
-        "buster-node": "0.1",
+        "buster-node": "*",
         "rimraf": "*"
     }
 }
