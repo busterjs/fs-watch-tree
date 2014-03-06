@@ -1,5 +1,7 @@
 # fs-watch-tree #
 
+[![Build status](https://secure.travis-ci.org/busterjs/fs-watch-tree.png?branch=master)](http://travis-ci.org/busterjs/fs-watch-tree)
+
 **Please note!** This package is outdated and not actively maintained. I would suggest looking at http://github.com/shama/gaze or https://github.com/paulmillr/chokidar.
 
 -----------------------------
