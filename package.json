@@ -26,7 +26,8 @@
         "url": "https://github.com/busterjs/fs-watch-tree.git"
     },
     "scripts": {
-        "test": "node run-tests.js"
+        "test": "node run-tests.js",
+        "test-debug": "node --debug-brk run-tests.js"
     },
     "dependencies": {
         "when": "https://github.com/cujojs/when/tarball/1.3.0",
